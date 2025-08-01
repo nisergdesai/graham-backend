@@ -5,12 +5,15 @@ import re
 
 app = FastAPI(title="Graham Stock Screener API")
 
-# ✅ Replace with your actual deployed frontend URL
-origins = ["https://graham-frontend.vercel.app"]
+# Add BOTH localhost and Vercel for development + production
+origins = [
+    "http://localhost:3000",
+    "https://graham-frontend.vercel.app"
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,         # This MUST match your frontend domain
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
