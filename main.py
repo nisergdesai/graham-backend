@@ -1,17 +1,22 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from graham_checker import evaluate_stock
+import re
 
 app = FastAPI(title="Graham Stock Screener API")
 
+# ✅ Replace with your actual deployed frontend URL
+origins = ["https://graham-frontend.vercel.app"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+# 
 cache = {}  # Optional in-memory cache
 
 @app.get("/")
