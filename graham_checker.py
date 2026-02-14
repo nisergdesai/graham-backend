@@ -22,7 +22,7 @@ def to_native(value):
     return value
 
 def convert_numpy(obj):
-    """Recursively convert numpy data to native Python types"""
+    """Recursively convert numpy/pandas data to native JSON-safe Python types"""
     if isinstance(obj, dict):
         return {k: convert_numpy(v) for k, v in obj.items()}
     elif isinstance(obj, tuple):
@@ -30,7 +30,15 @@ def convert_numpy(obj):
     elif isinstance(obj, list):
         return [convert_numpy(x) for x in obj]
     elif isinstance(obj, np.generic):
-        return obj.item()
+        val = obj.item()
+        # Handle NaN after conversion
+        if isinstance(val, float) and math.isnan(val):
+            return None
+        return val
+    elif isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
     return obj
 
 def evaluate_stock(ticker):

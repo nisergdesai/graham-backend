@@ -23,6 +23,10 @@ app.add_middleware(
 # 
 cache = {}  # Optional in-memory cache
 
+@app.head("/")
+def root_head():
+    return {}
+
 @app.get("/")
 def root():
     return {"message": "Welcome to the Graham Stock Screener API"}
