@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 import yfinance as yf
+import functools
+print = functools.partial(print, flush=True)
 
 session = requests.Session()
 HEADERS = {

@@ -2,6 +2,8 @@ from yfinance_fetcher import get_yf_data
 from marketwatch_scraper import get_eps_history, check_dividends_stable
 import math
 import numpy as np
+import functools
+print = functools.partial(print, flush=True)
 
 def human_readable_number(num):
     if num is None or (isinstance(num, float) and math.isnan(num)):

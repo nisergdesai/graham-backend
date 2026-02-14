@@ -1,6 +1,8 @@
 import yfinance as yf
 import math
 import numpy as np
+import functools
+print = functools.partial(print, flush=True)
 
 def get_yf_data(ticker_symbol):
     try:
