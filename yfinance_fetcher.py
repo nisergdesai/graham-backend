@@ -1,21 +1,43 @@
 import yfinance as yf
 
 def get_yf_data(ticker_symbol):
-    ticker = yf.Ticker(ticker_symbol)
-    bs = ticker.balance_sheet
-    info = ticker.info
+    try:
+        ticker = yf.Ticker(ticker_symbol)
+        bs = ticker.balance_sheet
+        info = ticker.info
 
-    # Helper to avoid KeyError if row is missing
-    def safe_get(df, label):
-        return df.loc[label].iloc[0] if label in df.index else 0
+        if info is None or not info:
+            raise ValueError(f"No info returned from yfinance for {ticker_symbol}. The ticker may be invalid.")
 
+        # Helper to avoid KeyError if row is missing
+        def safe_get(df, label):
+            if df is None or df.empty:
+                return 0
+            # Try exact match first, then case-insensitive search
+            if label in df.index:
+                return df.loc[label].iloc[0]
+            # Try case-insensitive match
+            for idx in df.index:
+                if idx.lower().replace(" ", "") == label.lower().replace(" ", ""):
+                    return df.loc[idx].iloc[0]
+            return 0
 
-    return {
-        "current_assets": safe_get(bs, "Current Assets"),
-        "current_liabilities": safe_get(bs, "Current Liabilities"),
-        "long_term_debt": safe_get(bs, "Long Term Debt"),
-        "book_value_per_share": info.get("bookValue", None),
-        "price": info.get("currentPrice", None),
-        "trailing_pe": info.get("trailingPE", None),
-        "eps_ttm": info.get("trailingEps", None),
-    }
+        data = {
+            "current_assets": safe_get(bs, "Current Assets"),
+            "current_liabilities": safe_get(bs, "Current Liabilities"),
+            "long_term_debt": safe_get(bs, "Long Term Debt"),
+            "book_value_per_share": info.get("bookValue", None),
+            "price": info.get("currentPrice", None),
+            "trailing_pe": info.get("trailingPE", None),
+            "eps_ttm": info.get("trailingEps", None),
+        }
+
+        print(f"[yfinance] Data for {ticker_symbol}: current_assets={data['current_assets']}, "
+              f"current_liabilities={data['current_liabilities']}, long_term_debt={data['long_term_debt']}, "
+              f"price={data['price']}, pe={data['trailing_pe']}, bvps={data['book_value_per_share']}")
+
+        return data
+
+    except Exception as e:
+        print(f"[yfinance] ERROR fetching data for {ticker_symbol}: {e}")
+        raise ValueError(f"Failed to fetch financial data for {ticker_symbol} from yfinance: {e}")

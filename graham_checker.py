@@ -41,15 +41,17 @@ def evaluate_stock(ticker):
 
     # Current Ratio
     cr = 0
-    if yf_data["current_liabilities"]:
-        cr = yf_data["current_assets"] / yf_data["current_liabilities"]
+    current_assets = yf_data.get("current_assets", 0) or 0
+    current_liabilities = yf_data.get("current_liabilities", 0) or 0
+    if current_liabilities and current_liabilities != 0:
+        cr = current_assets / current_liabilities
     results["Current Ratio ≥ 2"] = (round(cr, 2), to_native(cr >= 2))
 
     # Long-term Debt vs Net Current Assets
     ltd = yf_data.get("long_term_debt")
     if ltd is None or (isinstance(ltd, float) and math.isnan(ltd)):
         ltd = 0.0
-    nca = yf_data["current_assets"] - yf_data["current_liabilities"]
+    nca = current_assets - current_liabilities
     ltd_pass = ltd <= nca
     results["Long-term Debt ≤ Net Current Assets"] = (
         f"LTD: {human_readable_number(ltd)}, NCA: {human_readable_number(nca)}", to_native(ltd_pass)

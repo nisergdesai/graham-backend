@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from graham_checker import evaluate_stock
+import traceback
 import re
 
 app = FastAPI(title="Graham Stock Screener API")
@@ -41,4 +42,6 @@ def analyze(ticker: str = Query(..., min_length=1, description="Stock ticker sym
         cache[ticker] = results
         return {"ticker": ticker, "graham_results": results, "cached": False}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        tb = traceback.format_exc()
+        print(f"[ERROR] /analyze failed for {ticker}:\n{tb}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed for {ticker}: {str(e)}")
