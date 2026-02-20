@@ -113,3 +113,45 @@ def evaluate_stock(ticker):
         results["P/B ≤ 1.5 or PE×PB ≤ 22.5"] = ("N/A (missing PE or BVPS)", False)
 
     return convert_numpy(results)
+
+
+def safe_evaluate_stock(ticker):
+    """
+    Wrapper around evaluate_stock that catches any exception for a single
+    ticker so one failure doesn't crash the entire screening run.
+    Returns (ticker, results_dict) on success, or (ticker, None) on failure.
+    """
+    try:
+        results = evaluate_stock(ticker)
+        return (ticker, results)
+    except Exception as e:
+        print(f"[Screen] Error evaluating {ticker}: {e}")
+        return (ticker, None)
+
+
+def passes_mandatory_criteria(results):
+    """
+    Check whether the evaluated results pass ALL 4 mandatory Graham criteria:
+      1. Current Ratio >= 2
+      2. Long-term Debt <= Net Current Assets
+      3. P/E <= 15
+      4. P/B <= 1.5 OR PE*PB <= 22.5
+
+    Each entry in results is (value_display, bool_passed).
+    Returns True only if all 4 mandatory criteria have passed=True.
+    """
+    mandatory_keys = [
+        "Current Ratio ≥ 2",
+        "Long-term Debt ≤ Net Current Assets",
+        "P/E ≤ 15",
+        "P/B ≤ 1.5 or PE×PB ≤ 22.5",
+    ]
+    for key in mandatory_keys:
+        entry = results.get(key)
+        if entry is None:
+            return False
+        # entry is (display_value, passed_bool)
+        _, passed = entry
+        if not passed:
+            return False
+    return True
