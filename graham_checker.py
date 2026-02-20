@@ -1,5 +1,4 @@
-from yfinance_fetcher import get_yf_data
-from marketwatch_scraper import get_eps_history, check_dividends_stable
+from yfinance_fetcher import get_yf_data, get_eps_history, check_dividends_20yr
 import math
 import numpy as np
 
@@ -88,7 +87,7 @@ def evaluate_stock(ticker):
     results["Positive EPS for 5 years"] = (last_5_eps, to_native(positive_eps))
 
     # Dividend consistency (20-year record)
-    dividends_ok = check_dividends_stable(ticker)
+    dividends_ok = check_dividends_20yr(ticker)
     results["20-Year Dividend Record"] = (to_native(dividends_ok), to_native(dividends_ok))
 
     # P/E Ratio
